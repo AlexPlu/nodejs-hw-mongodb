@@ -12,18 +12,21 @@ import {
 async function getContacts(req, res) {
   const { page, perPage } = parsePaginationParams(req.query);
   const { sortBy, sortOrder } = parseSortParams(req.query);
+  const userId = req.user._id;
   const response = await getAllContacts({
     page,
     perPage,
     sortBy,
     sortOrder,
+    userId,
   });
   res.json(response);
 }
 
 async function getContact(req, res) {
   try {
-    const response = await getContactById(req.params.contactId);
+    const userId = req.user._id;
+    const response = await getContactById(req.params.contactId, userId);
     res.json(response);
   } catch (error) {
     res.status(404).json({ message: error.message });
@@ -31,7 +34,10 @@ async function getContact(req, res) {
 }
 
 async function createContactController(req, res) {
-  const contact = await createContact(req.body);
+  const { name, email, phone } = req.body;
+  const userId = req.user._id;
+
+  const contact = await createContact({ name, email, phone, userId });
 
   res.status(201).json({
     status: 201,
@@ -42,7 +48,8 @@ async function createContactController(req, res) {
 
 async function deleteContactController(req, res, next) {
   const { contactId } = req.params;
-  const contact = await deleteContact(contactId);
+  const userId = req.user._id;
+  const contact = await deleteContact(contactId, userId);
 
   if (!contact) {
     next(createHttpError(404, 'Contact not found'));
@@ -54,7 +61,8 @@ async function deleteContactController(req, res, next) {
 
 async function upsertContactController(req, res, next) {
   const { contactId } = req.params;
-  const result = await updateContact(contactId, req.body, {
+  const userId = req.user._id;
+  const result = await updateContact(contactId, userId, req.body, {
     upsert: true,
   });
 

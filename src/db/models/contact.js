@@ -6,6 +6,7 @@ const contactSchema = new Schema(
     phoneNumber: { type: String, required: true },
     email: { type: String },
     isFavourite: { type: Boolean, default: false },
+    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     contactType: {
       type: String,
       enum: ['work', 'home', 'personal'],
