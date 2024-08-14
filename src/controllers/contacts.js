@@ -7,17 +7,36 @@ import {
   updateContact,
 } from '../services/contacts.js';
 
-async function getContacts(req, res) {
-  const response = await getAllContacts();
-  res.json(response);
+async function getContacts(req, res, next) {
+  try {
+    const contacts = await getAllContacts();
+
+    res.json({
+      status: 200,
+      message: 'Successfully found contacts!',
+      data: contacts,
+    });
+  } catch (err) {
+    next(err);
+  }
 }
 
-async function getContact(req, res) {
+async function getContact(req, res, next) {
   try {
-    const response = await getContactById(req.params.contactId);
-    res.json(response);
-  } catch (error) {
-    res.status(404).json({ message: error.message });
+    const { contactId } = req.params;
+    const contact = await getContactById(contactId);
+
+    if (!contact) {
+      throw createHttpError(404, 'Contact not found');
+    }
+
+    res.json({
+      status: 200,
+      message: `Successfully found contact with id ${contactId}!`,
+      data: contact,
+    });
+  } catch (err) {
+    next(err);
   }
 }
 
