@@ -9,27 +9,46 @@ import {
   updateContact,
 } from '../services/contacts.js';
 
-async function getContacts(req, res) {
-  const { page, perPage } = parsePaginationParams(req.query);
-  const { sortBy, sortOrder } = parseSortParams(req.query);
-  const userId = req.user._id;
-  const response = await getAllContacts({
-    page,
-    perPage,
-    sortBy,
-    sortOrder,
-    userId,
-  });
-  res.json(response);
+async function getContacts(req, res, next) {
+  try {
+    const { page, perPage } = parsePaginationParams(req.query);
+    const { sortBy, sortOrder } = parseSortParams(req.query);
+    const userId = req.user._id;
+    const contacts = await getAllContacts({
+      page,
+      perPage,
+      sortBy,
+      sortOrder,
+      userId,
+    });
+
+    res.json({
+      status: 200,
+      message: 'Successfully found contacts!',
+      data: contacts,
+    });
+  } catch (err) {
+    next(err);
+  }
 }
 
-async function getContact(req, res) {
+async function getContact(req, res, next) {
   try {
     const userId = req.user._id;
-    const response = await getContactById(req.params.contactId, userId);
-    res.json(response);
-  } catch (error) {
-    res.status(404).json({ message: error.message });
+    const { contactId } = req.params;
+    const contact = await getContactById(contactId, userId);
+
+    if (!contact) {
+      throw createHttpError(404, 'Contact not found');
+    }
+
+    res.json({
+      status: 200,
+      message: `Successfully found contact with id ${contactId}!`,
+      data: contact,
+    });
+  } catch (err) {
+    next(err);
   }
 }
 

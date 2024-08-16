@@ -1,7 +1,6 @@
 import { ContactsCollection } from '../db/models/contact.js';
 import { SORT_ORDER } from '../constants/index.js';
 import { calculatePaginationData } from '../utils/calculatePaginationData.js';
-import createHttpError from 'http-errors';
 
 export const getAllContacts = async ({
   page = 1,
@@ -36,14 +35,7 @@ export const getAllContacts = async ({
 
 export const getContactById = async (contactId, userId) => {
   const contact = await ContactsCollection.findOne({ _id: contactId, userId });
-  if (!contact) {
-    throw createHttpError(404, 'Contact not found');
-  }
-  return {
-    status: 200,
-    message: `Successfully found contact with id ${contactId}!`,
-    data: contact,
-  };
+  return contact;
 };
 
 export const createContact = async (payload) => {
