@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import express from 'express';
 import {
   getContacts,
   getContact,
@@ -17,6 +18,10 @@ import { isValidId } from '../middlewares/isValidId.js';
 import { authenticate } from '../middlewares/authenticate.js';
 
 const router = Router();
+const jsonParser = express.json({
+  type: ['application/json', 'application/vnd.api+json'],
+  limit: '100kb',
+});
 
 router.use(authenticate);
 
@@ -24,7 +29,8 @@ router.get('/', ctrlWrapper(getContacts));
 router.get('/:contactId', isValidId, ctrlWrapper(getContact));
 
 router.post(
-  '/register',
+  '',
+  jsonParser,
   validateBody(createContactSchema),
   ctrlWrapper(createContactController),
 );
@@ -40,6 +46,7 @@ router.put(
 
 router.patch(
   '/:contactId',
+  jsonParser,
   isValidId,
   validateBody(updateContactSchema),
   ctrlWrapper(patchContactController),
