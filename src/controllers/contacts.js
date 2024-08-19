@@ -1,5 +1,6 @@
 import createHttpError from 'http-errors';
 import { parsePaginationParams } from '../utils/parsePaginationParams.js';
+import { saveContactPhoto } from '../utils/saveContactPhoto.js';
 import { parseSortParams } from '../utils/parseSortParams.js';
 import {
   getAllContacts,
@@ -53,9 +54,12 @@ async function getContact(req, res, next) {
 }
 
 async function createContactController(req, res) {
+  const photo = req.file;
+  let photoUrl = await saveContactPhoto(photo);
   const contact = await createContact({
     ...req.body,
     userId: req.user._id,
+    photo: photoUrl,
   });
 
   res.status(201).json({
@@ -99,7 +103,13 @@ async function upsertContactController(req, res, next) {
 
 async function patchContactController(req, res, next) {
   const { contactId } = req.params;
-  const result = await updateContact(contactId, req.user._id, req.body);
+  const photo = req.file;
+  let photoUrl = await saveContactPhoto(photo);
+
+  const result = await updateContact(contactId, req.user._id, {
+    ...req.body,
+    photo: photoUrl,
+  });
 
   if (!result) {
     next(createHttpError(404, 'Contact not found'));
