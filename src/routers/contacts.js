@@ -19,10 +19,7 @@ import { authenticate } from '../middlewares/authenticate.js';
 import { upload } from '../middlewares/multer.js';
 
 const router = Router();
-const jsonParser = express.json({
-  type: ['application/json', 'application/vnd.api+json'],
-  limit: '100kb',
-});
+const jsonParser = express.json();
 
 router.use(authenticate);
 
